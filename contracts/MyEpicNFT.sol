@@ -25,6 +25,8 @@ contract MyEpicNFT is ERC721URIStorage {
     string[] secondWords = ["Ambitious", "Dangerous", "Nebulous", "Enormous", "Beautiful", "Maddening"];
     string[] thirdWords = ["Employment", "Strategy", "History", "Currency", "Solution", "Surgery"];
 
+    event NewEpicNFTMinted(address sender, uint256 tokenId);
+
     // When creating NFT we need to pass two things
     // A name (SquareNFT) and a token symbol (SQUARE)
     constructor() ERC721("SquareNFT", "SQUARE") {
@@ -100,5 +102,7 @@ contract MyEpicNFT is ERC721URIStorage {
         );
         // increment counter for the next NFT
         _tokenIds.increment();
+
+        emit NewEpicNFTMinted(msg.sender, newTokenId);
     }
 }
