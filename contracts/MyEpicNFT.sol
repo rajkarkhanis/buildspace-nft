@@ -10,27 +10,23 @@ import "hardhat/console.sol";
 
 import { Base64 } from "./libraries/Base64.sol";
 
-// We define that our contract is ERC721 i.e. an NFT
 contract MyEpicNFT is ERC721URIStorage {
-    // Every NFT in the collection has a unique number
-    // We can assign ID to each NFT with Counters
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    // We'll create dynamic SVGs from this base SVG
+    uint256 public totalSupply = 50;
+    uint256 public totalMinted = 0;
+
     string baseSVG = "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base{fill: white;font-family: &apos;Helvetica&apos;;font-size: 18px;line-height: 24px;font-weight: 700;}</style><rect width='100%' height='100%' fill='url(#gradient-fill)'/><defs><linearGradient id='gradient-fill' x1='0' y1='0' x2='800' y2='0' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='#fc466b'/><stop offset='0.14285714285714285' stop-color='#fa377f'/><stop offset='0.2857142857142857' stop-color='#f22c94'/><stop offset='0.42857142857142855' stop-color='#e52cab'/><stop offset='0.5714285714285714' stop-color='#d135c1'/><stop offset='0.7142857142857142' stop-color='#b343d7'/><stop offset='0.8571428571428571' stop-color='#8a51eb'/><stop offset='1' stop-color='#3f5efb'/></linearGradient></defs><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
 
-    // By creating random sequence of words among these words
     string[] firstWords = ["Consitute", "Organize", "Calculate", "Separate", "Establish", "Formulate"];
     string[] secondWords = ["Ambitious", "Dangerous", "Nebulous", "Enormous", "Beautiful", "Maddening"];
     string[] thirdWords = ["Employment", "Strategy", "History", "Currency", "Solution", "Surgery"];
 
     event NewEpicNFTMinted(address sender, uint256 tokenId);
 
-    // When creating NFT we need to pass two things
-    // A name (SquareNFT) and a token symbol (SQUARE)
-    constructor() ERC721("SquareNFT", "SQUARE") {
-        console.log("Waddup");
+    constructor() ERC721("Fortune Cookie NFT", "FORTUNE") {
+        console.log("Find out what the future holds for you");
     }
 
     function pickRandomFirstWord(uint256 tokenId) public view returns (string memory){
@@ -55,10 +51,10 @@ contract MyEpicNFT is ERC721URIStorage {
         return uint256(keccak256(abi.encodePacked(input)));
     }
 
-    // This is the mint function
-    // It will be called by users when they hit "Mint NFT" on the website
     function makeAnEpicNFT() public {
-        // Get current tokenId, starts at 0
+        require(totalMinted < totalSupply, "The Fortune Cookies are sold out. You have no future.");
+        totalMinted = totalMinted + 1;
+
         uint256 newTokenId = _tokenIds.current();
 
         string memory firstWord = pickRandomFirstWord(newTokenId);
@@ -82,25 +78,15 @@ contract MyEpicNFT is ERC721URIStorage {
             )
         );
 
-        string memory finalTokenURI = string(
-            abi.encodePacked("data:application/json;base64,", json)
-        );
+        string memory finalTokenURI = string(abi.encodePacked("data:application/json;base64,", json));
         console.log("\n---------------------");
         console.log(finalTokenURI);
         console.log("---------------------\n");
-        // Mint the NFT and send to the user with msg.sender
+
         _safeMint(msg.sender, newTokenId);
-        // set the data of the NFT, like an image or a video
-        _setTokenURI(
-            newTokenId,
-            finalTokenURI
-        );
-        console.log(
-            "A new NFT w/ID %s has been minted to %s",
-            newTokenId,
-            msg.sender
-        );
-        // increment counter for the next NFT
+        _setTokenURI(newTokenId, finalTokenURI);
+        console.log("A new NFT w/ID %s has been minted to %s", newTokenId, msg.sender);
+        
         _tokenIds.increment();
 
         emit NewEpicNFTMinted(msg.sender, newTokenId);
